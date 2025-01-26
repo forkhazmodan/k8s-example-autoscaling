@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: springboot-app
+spec:
+  selector:
+    app: springboot
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080
+  type: NodePort

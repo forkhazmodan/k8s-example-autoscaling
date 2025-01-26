@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springboot-app
+spec:
+  selector:
+    matchLabels:
+      app: springboot
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1  # Allow 2 extra pods to be created when scaling
+      maxUnavailable: 0  # Ensure all existing pods remain active
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: springboot
+    spec:
+      containers:
+        - name: autoscaling
+          image: chukhnovmaksym/k8s-example-autoscaling:latest
+          imagePullPolicy: Always
+          readinessProbe:
+            initialDelaySeconds: 60  # Increase this delay if your app needs more time to start
+            periodSeconds: 10
+            failureThreshold: 3
+            httpGet:
+              path: /actuator/health
+              port: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+          resources:
+            requests:
+              cpu: 400m
+              memory: 512Mi
+            limits:
+              cpu: 400m  # By exceeding this limit container will be "clumped" or "throttled"
+              memory: 512Mi # By exceeding this limit container will be killed!
